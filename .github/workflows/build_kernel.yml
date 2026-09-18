@@ -26,11 +26,12 @@ jobs:
           if [ -d "kernel/.git" ]; then
             echo "Kernel repo exists, fetching updates..."
             cd kernel
+            git remote set-url origin https://github.com/nzlnice/android_kernel_oneplus_sm8350.git
             git fetch --depth 1 origin 16.0
             git reset --hard origin/16.0
           else
             echo "Cloning kernel repo..."
-            git clone --depth 1 https://github.com/crdroidandroid/android_kernel_oneplus_sm8350 -b 16.0 kernel
+            git clone --depth 1 https://github.com/nzlnice/android_kernel_oneplus_sm8350.git -b 16.0 kernel
           fi
 
       - name: Cache Neutron Clang
@@ -46,8 +47,8 @@ jobs:
           mkdir -p toolchain
           cd toolchain
           wget https://github.com/Neutron-Toolchains/clang-build-catalogue/releases/download/06092026/neutron-clang-06092026.tar.zst
-          tar -xf neutron-clang-30072026.tar.zst
-          rm neutron-clang-30072026.tar.zst
+          tar -xf neutron-clang-06092026.tar.zst
+          rm neutron-clang-06092026.tar.zst
           echo "$GITHUB_WORKSPACE/toolchain/bin" >> $GITHUB_PATH
 
       - name: Cache ccache
@@ -63,6 +64,12 @@ jobs:
           cd kernel
           patch -p1 < ../patches/001.GKI-below-6.12-fix_sysvipc_kabi_1_2_3.patch
           patch -p1 < ../patches/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch
+
+      - name: Setup ReSukiSU
+        run: |
+          cd kernel
+          curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash -
+
       - name: Setup build environment
         run: |
           sudo apt update
